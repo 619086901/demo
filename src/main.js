@@ -1,5 +1,11 @@
-import { createApp } from "vue";
-import App from "./App.vue";
-import router from "./router";
+import { createApp } from 'vue'
+import App from './App.vue'
+import './tool/WkEpg3.2'
+//import $ from 'jquery'
+import Mock from 'mockjs'
+import './tool/Util'
+//window.WkEpg.Util.$ = $
 
-createApp(App).use(router).mount("#app");
+window.Mock = Mock
+//window.$ = $
+createApp(App).mount('#app')

@@ -54,7 +54,11 @@
               </div>
             </div>
             <div class="select">
-              <img src="./images/bk.png" :id="['bk_' + i]" />
+              <img
+                src="./images/bk.png"
+                :id="['bk_' + i]"
+                v-show="item.select"
+              />
             </div>
           </div>
         </template>
@@ -91,6 +95,8 @@
         <img src="./images/CD.png" />
       </div>
     </div>
+    <div id="up" v-show="up">《</div>
+    <div id="down" v-show="down">》</div>
     <!-- 底部滚动条 -->
     <div id="scroll_root">
       <div id="scroll_barbg">
@@ -165,7 +171,8 @@ export default {
           clock_s: {
             hidden: false
           }
-        }
+        },
+        select: true
       },
       area0_item_1: {
         style: {
@@ -185,7 +192,8 @@ export default {
           clock_s: {
             hidden: false
           }
-        }
+        },
+        select: false
       },
       area0_item_2: {
         style: {
@@ -205,7 +213,8 @@ export default {
           clock_s: {
             hidden: false
           }
-        }
+        },
+        select: false
       },
       area0_item_3: {
         style: {
@@ -225,7 +234,8 @@ export default {
           clock_s: {
             hidden: false
           }
-        }
+        },
+        select: false
       },
       area0_item_4: {
         style: {
@@ -245,7 +255,8 @@ export default {
           clock_s: {
             hidden: false
           }
-        }
+        },
+        select: false
       },
       area0_item_5: {
         style: {
@@ -265,14 +276,22 @@ export default {
           clock_s: {
             hidden: false
           }
-        }
+        },
+        select: false
       }
     })
+
+    //箭头
+    const upDown = reactive({
+      up: false,
+      down: true
+    })
+
     let data = Mock.mock({
       'data|200': [
         {
           'id|+1': 1,
-          time: /^[1-3]\.[0-5][0-9]$/,
+          time: /^0[1-3]\.[0-5][0-9]$/,
           name: '@cname'
         }
       ]
@@ -512,6 +531,7 @@ export default {
             }
           }
         } else {
+          unplayStyle()
           //焦点翻页锁
           area0.pageTurnAndChangeFocus()
         }
@@ -591,6 +611,8 @@ export default {
         area0Data[`area0_item_${groupindex}`].bottom.clock_s.hidden = true //耳机图标
         //
         area0Data[`area0_item_${groupindex}`].bottom.txt = `${txt}`
+        //边框
+        area0Data[`area0_item_${groupindex}`].select = true
       }
     }
     //取消播放样式
@@ -604,6 +626,9 @@ export default {
         if (area0.darkPage == area0.curpage)
           area0Data[`area0_item_${groupindex}`].bottom.txt =
             area0.doms[groupindex].contentTime
+
+        //边框
+        area0Data[`area0_item_${groupindex}`].select = false
       }
     }
 
@@ -655,6 +680,10 @@ export default {
 
     function handleList(index) {
       let sum = (index ? index : 0) * 6
+
+      upDown.up = sum > 0 ? true : false
+      upDown.down = sum < 198 ? true : false
+
       for (let i = 0; i <= 5; i++) {
         if (data.data[sum + i]) {
           area0.datanum = i + 1
@@ -675,6 +704,7 @@ export default {
           area0.doms[i].contentTime = ''
           area0Data[`area0_item_${i}`].bottom.clock.hidden = false
           area0Data[`area0_item_${i}`].bottom.clock_s.hidden = false
+          area0Data[`area0_item_${i}`].select = false
           area0.doms[i].setScroll = false
         }
       }
@@ -691,7 +721,6 @@ export default {
         scroll_bar_width
       } = toRefs(scroll)
 
-      console.log(area0)
       secondArr.value = area0.doms[formconfig.groupindex].contentTime.split('.')
       seconds.value = secondArr.value[0] * 60 + parseInt(secondArr.value[1])
       perScroll.value = 100 / seconds.value
@@ -713,11 +742,13 @@ export default {
 
     const scrollToRefs = toRefs(scroll)
     const area0ToRefs = toRefs(area0Data)
+    const upDownToRefs = toRefs(upDown)
     return {
       formconfig,
       ...scrollToRefs,
       ...area0ToRefs,
-      area0Data
+      area0Data,
+      ...upDownToRefs
     }
   }
 }
@@ -753,9 +784,7 @@ body {
       .item {
         height: 105px;
         width: 550px;
-        .select {
-          display: none;
-        }
+
         .left_txt {
           height: 105px;
           width: 90px;
@@ -793,10 +822,10 @@ body {
         }
       }
       .item_focus .select {
-        display: block;
+        //display: block;
       }
       .item_active .select {
-        display: block;
+        //display: block !important;
       }
       .item_active div {
         color: #ffd83d !important;
@@ -832,6 +861,57 @@ body {
       .item_focus {
         box-shadow: 1px 1px 8px 2px rgba(13, 128, 236, 0.84);
       }
+    }
+  }
+  #up,
+  #down {
+    top: 740px;
+    font-size: 45px;
+    color: white;
+    //border: 1px solid red;
+  }
+  #up {
+    position: absolute;
+    animation: bounce-up 3s 1s infinite;
+    left: 335px;
+  }
+  @keyframes bounce-up {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(-20px);
+    }
+    80% {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+  #down {
+    position: absolute;
+    animation: bounce-down 3s 1s infinite;
+    left: 975px;
+  }
+  @keyframes bounce-down {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(20px);
+    }
+    80% {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(0);
     }
   }
 
